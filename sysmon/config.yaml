@@ -9,3 +9,14 @@ auth:
   username: "admin"
   password_hash: "$2a$10$qzOtksrTBIHx8zOHL9/40ejC/BdO48s6nlXflr5JUmpvaulKJgtBa"        # run: go run ./cmd/hashpw <yourpassword>
   jwt_secret: "change-this-to-a-long-random-string-min-32-chars"
+
+peers:
+  - name: "nas-server"
+    url: "http://192.168.1.10:7070"
+    token: ""
+  - name: "ubuntu-box"
+    url: "http://192.168.1.11:7070"
+    token: ""
+  - name: "win-server"
+    url: "http://192.168.1.12:7070"
+    token: ""

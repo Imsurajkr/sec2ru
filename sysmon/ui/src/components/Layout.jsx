@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { Server } from 'lucide-react'
 import { LayoutDashboard, List, Zap, Info, LogOut, Activity } from 'lucide-react'
 
 const NAV = [
@@ -7,6 +8,7 @@ const NAV = [
   { to: '/processes', icon: List,            label: 'Processes' },
   { to: '/spikes',    icon: Zap,             label: 'Spikes'    },
   { to: '/info',      icon: Info,            label: 'System Info'},
+  { to: '/servers',   icon: Server,          label: 'Servers' },
 ]
 
 export default function Layout({ children }) {

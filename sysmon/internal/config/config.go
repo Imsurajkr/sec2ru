@@ -16,12 +16,20 @@ type AgentConfig struct {
 type AuthConfig struct {
     Username     string `yaml:"username"`
     PasswordHash string `yaml:"password_hash"`
-    JWTSecret    string `yaml:"jwt_secret"`    // ← new
+    JWTSecret    string `yaml:"jwt_secret"`
+}
+
+// PeerConfig represents one remote sysmon agent node.
+type PeerConfig struct {
+    Name  string `yaml:"name"`
+    URL   string `yaml:"url"`   // e.g. http://192.168.1.10:7070
+    Token string `yaml:"token"` // JWT obtained from that node's /api/login
 }
 
 type Config struct {
-    Agent AgentConfig `yaml:"agent"`
-    Auth  AuthConfig  `yaml:"auth"`
+    Agent AgentConfig  `yaml:"agent"`
+    Auth  AuthConfig   `yaml:"auth"`
+    Peers []PeerConfig `yaml:"peers"` // ← new
 }
 
 func Load(path string) (*Config, error) {

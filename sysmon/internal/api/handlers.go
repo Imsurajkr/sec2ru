@@ -13,6 +13,7 @@ import (
     "github.com/imsurajkr/sysmon/internal/config"
     "github.com/imsurajkr/sysmon/internal/models"
     "github.com/imsurajkr/sysmon/internal/store"
+	"github.com/imsurajkr/sysmon/internal/hub"
 )
 
 // Handler holds shared dependencies for all HTTP handlers.
@@ -181,4 +182,41 @@ func queryDuration(r *http.Request, key string, def time.Duration) time.Duration
     d, err := time.ParseDuration(v)
     if err != nil { return def }
     return d
+}
+
+// ── GET /api/nodes ────────────────────────────────────────────────────
+// Returns live status of all configured peer nodes, fetched concurrently.
+// The calling node's own data is NOT included here — the UI fetches
+// that separately via /api/live so it always has up-to-date self data.
+
+func (h *Handler) Nodes(w http.ResponseWriter, r *http.Request) {
+    statuses := hub.FetchAll(h.cfg.Peers)
+    jsonOK(w, statuses)
+}
+
+// ── GET /api/self ─────────────────────────────────────────────────────
+// Returns this node's live data + its own name/url so the Servers page
+// can render it as the first card identically to peer cards.
+
+type selfResponse struct {
+    hub.NodeStatus                      // embeds Online, System, Processes
+    IsSelf bool `json:"is_self"`
+}
+
+func (h *Handler) Self(w http.ResponseWriter, r *http.Request) {
+    sys, _   := h.store.LatestSystem()
+    procs, _ := h.store.LatestProcesses()
+
+    resp := selfResponse{
+        NodeStatus: hub.NodeStatus{
+            Name:      h.cfg.Agent.NodeName,
+            URL:       "http://localhost" + h.cfg.Agent.ListenAddr,
+            Online:    true,
+            System:    sys,
+            Processes: procs,
+            FetchedAt: time.Now().UnixMilli(),
+        },
+        IsSelf: true,
+    }
+    jsonOK(w, resp)
 }
