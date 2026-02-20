@@ -1,0 +1,11 @@
+agent:
+  node_name: "my-machine"
+  collect_interval: "2s"
+  retention: "24h"
+  listen_addr: ":7070"
+  db_path: "sysmon.db"
+
+auth:
+  username: "admin"
+  password_hash: "$2a$10$qzOtksrTBIHx8zOHL9/40ejC/BdO48s6nlXflr5JUmpvaulKJgtBa"        # run: go run ./cmd/hashpw <yourpassword>
+  jwt_secret: "change-this-to-a-long-random-string-min-32-chars"
