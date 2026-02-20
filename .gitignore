@@ -1,0 +1,50 @@
+# Go build output
+bin/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go test artifacts
+*.test
+*.out
+coverage.html
+coverage.out
+
+# Go module cache
+vendor/
+
+# Binaries built by Makefile
+sysmon/agent
+sysmon/hashpw
+
+# Database files
+*.db
+*.db-lock
+*.db-shm
+*.db-wal
+
+# Configuration with secrets (use config.yaml.example for templates)
+sysmon/config.yaml
+
+# Downloaded archives / tarballs
+*.tar.gz
+*.zip
+*.tgz
+
+# IDE and editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
