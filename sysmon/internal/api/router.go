@@ -11,6 +11,7 @@ import (
     "github.com/imsurajkr/sysmon/internal/auth"
     "github.com/imsurajkr/sysmon/internal/config"
     "github.com/imsurajkr/sysmon/internal/store"
+	"github.com/imsurajkr/sysmon/internal/ui"
 )
 
 // NewRouter builds the full Chi router.
@@ -36,6 +37,8 @@ func NewRouter(cfg *config.Config, st *store.Store) http.Handler {
 
     // ── Public routes ──────────────────────────────────────────────
     r.Post("/api/login", h.Login)
+
+	r.Handle("/*", ui.SPAHandler())
 
     // ── Protected routes (JWT required) ───────────────────────────
     r.Group(func(r chi.Router) {
