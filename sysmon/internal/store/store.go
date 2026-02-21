@@ -4,6 +4,7 @@ import (
     "encoding/binary"
     "encoding/json"
     "log"
+    "strings"
     "time"
 
     "github.com/imsurajkr/sec2ru/internal/models"
@@ -179,26 +180,23 @@ func (s *Store) QueryNetConnections(since, until int64, pid int32, state, remote
     return out, err
 }
 
+// matchesFilters returns true if the snapshot contains at least one connection
+// that satisfies ALL of the supplied filter criteria (zero-value = any).
 func matchesFilters(snap *models.NetConnectionSnapshot, pid int32, state, remoteIP, port string) bool {
-    if pid != 0 {
-        for _, c := range snap.Connections {
-            if c.PID == pid { return true }
-        }
-        return false
-    }
-    if state != "" {
-        for _, c := range snap.Connections {
-            if c.Status == state { return true }
-        }
-        return false
-    }
+    for _, c := range snap.Connections {
+        if pid != 0 && c.PID != pid { continue }
+        if state != "" && c.Status != state { continue }
+        if remoteIP != "" && c.Raddr != remoteIP { continue }
+        if port != "" && !strings.HasSuffix(c.Laddr, ":"+port) && !strings.HasSuffix(c.Raddr, ":"+port) { continue }
         return true
+    }
+    return false
 }
 // ── TTL Cleanup ──────────────────────────────────────────────────────
 
 func (s *Store) Cleanup() {
     cutoff := tsKey(time.Now().Add(-s.retention).UnixMilli())
-    for _, bucket := range [][]byte{bucketSystem, bucketProcesses, bucketSpikes} {
+    for _, bucket := range [][]byte{bucketSystem, bucketProcesses, bucketSpikes, bucketNetConn} {
         _ = s.db.Update(func(tx *bolt.Tx) error {
             c := tx.Bucket(bucket).Cursor()
             for k, _ := c.First(); k != nil && bytesLT(k, cutoff); k, _ = c.Next() {

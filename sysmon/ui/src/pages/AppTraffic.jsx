@@ -117,15 +117,15 @@ function AppCard({ app, onDrillDown }) {
 export default function AppTraffic() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [window,   setWindow]   = useState('30m')
+  const [timeWindow, setTimeWindow] = useState('30m')
   const [catFilter, setCatFilter] = useState('all')
   const [nameFilter, setNameFilter] = useState(searchParams.get('name') ?? '')
 
-  const fetchSummary = useCallback(() => getAppSummary(window), [window])
-  const { data: apps, loading } = usePolling(fetchSummary, REFRESH_MS)
+  const fetchSummary = useCallback(() => getAppSummary(timeWindow), [timeWindow])
+  const { data: apps, loading, error } = usePolling(fetchSummary, REFRESH_MS)
 
   const filtered = useMemo(() => {
-    if (!apps) return []
+    if (!Array.isArray(apps)) return []
     return apps.filter(a => {
       if (catFilter !== 'all' && a.category !== catFilter) return false
       if (nameFilter && !a.process_name.toLowerCase().includes(nameFilter.toLowerCase())) return false
@@ -171,9 +171,9 @@ export default function AppTraffic() {
           {['15m','30m','1h','6h'].map(w => (
             <button
               key={w}
-              onClick={() => setWindow(w)}
+              onClick={() => setTimeWindow(w)}
               className={`px-3 py-1.5 text-xs rounded-lg border transition-colors ${
-                window === w
+                timeWindow === w
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-gray-900 text-gray-400 border-gray-700 hover:border-gray-600'
               }`}
@@ -204,6 +204,13 @@ export default function AppTraffic() {
           ) : null
         )}
       </div>
+
+      {/* ── Error banner ── */}
+      {error && (
+        <div className="bg-red-950/40 border border-red-900/50 rounded-xl px-4 py-3 text-sm text-red-400">
+          Failed to load app traffic: {error}
+        </div>
+      )}
 
       {/* ── Loading skeleton ── */}
       {loading && (

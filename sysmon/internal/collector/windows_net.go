@@ -28,20 +28,49 @@ func collectNetConnections() (*models.NetConnectionSnapshot, error) {
         line := scanner.Text()
         fields := strings.Fields(line)
 
-        if len(fields) < 5 || fields[3] == "LISTENING" {
-            continue // header or non-listening
+        if len(fields) < 4 {
+            continue // skip empty lines and "Active Connections" banner
         }
 
-        // Parse: Proto LocalAddress ForeignAddress State PID
-        if len(fields) < 5 {
+        // Only process lines that start with a known protocol; this skips the
+        // column-header line ("Proto  Local Address  Foreign Address  State  PID")
+        // which would otherwise pass the length check.
+        proto := strings.ToLower(fields[0])
+        isTCP := strings.HasPrefix(proto, "tcp")
+        isUDP := strings.HasPrefix(proto, "udp")
+        if !isTCP && !isUDP {
             continue
         }
 
-        proto := fields[0] // TCP, UDP
-        laddr := fields[1] // 0.0.0.0:80
-        raddr := fields[2] // *:*
-        status := fields[3]
-        pidStr := fields[4]
+        // Detect address family from the protocol variant name (TCPv6 / UDPv6).
+        family := "ipv4"
+        if strings.HasSuffix(proto, "v6") {
+            family = "ipv6"
+        }
+
+        var laddr, raddr, status, pidStr string
+
+        if isTCP {
+            // TCP/TCPv6: Proto LocalAddress ForeignAddress State PID  (5 fields)
+            if len(fields) < 5 {
+                continue
+            }
+            laddr  = fields[1]
+            raddr  = fields[2]
+            status = fields[3]
+            pidStr = fields[4]
+            // Normalize Windows "LISTENING" to "LISTEN" so it matches the
+            // AppSummary handler's listen-port check (c.Status == "LISTEN").
+            if status == "LISTENING" {
+                status = "LISTEN"
+            }
+        } else {
+            // UDP/UDPv6: Proto LocalAddress ForeignAddress PID  (4 fields, no State)
+            laddr  = fields[1]
+            raddr  = fields[2]
+            status = "LISTEN" // UDP sockets are always in "listening" state
+            pidStr = fields[3]
+        }
 
         pid, _ := strconv.Atoi(pidStr)
         procName := fmt.Sprintf("pid-%d", pid)
@@ -55,8 +84,8 @@ func collectNetConnections() (*models.NetConnectionSnapshot, error) {
         snap.Connections = append(snap.Connections, models.NetConnection{
             PID:         int32(pid),
             ProcessName: procName,
-            Family:      "ipv4", // netstat default
-            Type:        strings.ToLower(proto),
+            Family:      family,
+            Type:        proto,
             Laddr:       laddr,
             Raddr:       raddr,
             Status:      status,

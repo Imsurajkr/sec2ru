@@ -38,7 +38,6 @@ func NewRouter(cfg *config.Config, st *store.Store) http.Handler {
     // ── Public routes ──────────────────────────────────────────────
     r.Post("/api/login", h.Login)
 
-	r.Handle("/*", ui.SPAHandler())
 
     // ── Protected routes (JWT required) ───────────────────────────
     r.Group(func(r chi.Router) {
@@ -56,6 +55,8 @@ func NewRouter(cfg *config.Config, st *store.Store) http.Handler {
         r.Get("/api/network/conns", h.NetConnections)
         r.Get("/api/network/app-summary", h.AppSummary)
     })
+
+	r.Handle("/*", ui.SPAHandler())
 
     return r
 }

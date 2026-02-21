@@ -54,6 +54,7 @@ export default function Processes() {
             <tr className="border-b border-gray-800">
               <th className="text-left px-4 py-3 text-xs text-gray-500 font-medium w-14">PID</th>
               <th className="text-left px-4 py-3 text-xs text-gray-500 font-medium">Name</th>
+              <th className="px-4 py-3 w-16"></th>
               {SORTABLE.map(col => (
                 <th
                   key={col.key}
@@ -73,7 +74,7 @@ export default function Processes() {
           <tbody className="divide-y divide-gray-800/50">
             {loading && (
               <tr>
-                <td colSpan={6} className="text-center py-10 text-gray-500 text-sm">
+                <td colSpan={7} className="text-center py-10 text-gray-500 text-sm">
                   Loading…
                 </td>
               </tr>
