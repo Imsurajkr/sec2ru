@@ -2,16 +2,20 @@ import { useCallback, useState } from 'react'
 import { Search, ArrowDownUp } from 'lucide-react'
 import client from '../api/client'
 import { usePolling } from '../hooks/usePolling'
+import { useNavigate } from 'react-router-dom'
+import { Network } from 'lucide-react'
 
 const fmtMB = (b) => b ? `${(b / 1_048_576).toFixed(1)} MB` : '—'
 
 const SORTABLE = [
-  { key: 'cpu_percent', label: 'CPU %'  },
-  { key: 'mem_percent', label: 'Mem %'  },
-  { key: 'mem_rss_bytes', label: 'RSS'  },
+  { key: 'cpu_percent', label: 'CPU %' },
+  { key: 'mem_percent', label: 'Mem %' },
+  { key: 'mem_rss_bytes', label: 'RSS' },
 ]
 
+
 export default function Processes() {
+  const navigate = useNavigate()
   const [sortBy, setSortBy] = useState('cpu_percent')
   const [search, setSearch] = useState('')
 
@@ -54,9 +58,8 @@ export default function Processes() {
                 <th
                   key={col.key}
                   onClick={() => setSortBy(col.key)}
-                  className={`text-right px-4 py-3 text-xs font-medium cursor-pointer select-none transition-colors whitespace-nowrap ${
-                    sortBy === col.key ? 'text-blue-400' : 'text-gray-500 hover:text-gray-300'
-                  }`}
+                  className={`text-right px-4 py-3 text-xs font-medium cursor-pointer select-none transition-colors whitespace-nowrap ${sortBy === col.key ? 'text-blue-400' : 'text-gray-500 hover:text-gray-300'
+                    }`}
                 >
                   <span className="inline-flex items-center gap-1">
                     {col.label}
@@ -81,10 +84,22 @@ export default function Processes() {
                 <td className="px-4 py-2.5 text-gray-200 font-medium max-w-xs truncate">
                   {p.name}
                 </td>
+                <td className="px-4 py-2.5">
+                  <button
+                    onClick={() => navigate(
+                      `/connections?pid=${p.pid}&name=${encodeURIComponent(p.name)}`
+                    )}
+                    className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-400 transition-colors"
+                    title="View connections"
+                  >
+                    <Network className="w-3.5 h-3.5" />
+                    <span className="hidden md:inline">conns</span>
+                  </button>
+                </td>
                 <td className="px-4 py-2.5 text-right tabular-nums">
                   <span className={
                     p.cpu_percent > 50 ? 'text-red-400' :
-                    p.cpu_percent > 20 ? 'text-yellow-400' : 'text-gray-300'
+                      p.cpu_percent > 20 ? 'text-yellow-400' : 'text-gray-300'
                   }>
                     {p.cpu_percent?.toFixed(1)}%
                   </span>
@@ -96,11 +111,10 @@ export default function Processes() {
                   {fmtMB(p.mem_rss_bytes)}
                 </td>
                 <td className="px-4 py-2.5">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    p.status === 'running'
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${p.status === 'running'
                       ? 'bg-green-950 text-green-400 border border-green-900/50'
                       : 'bg-gray-800 text-gray-500'
-                  }`}>
+                    }`}>
                     {p.status}
                   </span>
                 </td>

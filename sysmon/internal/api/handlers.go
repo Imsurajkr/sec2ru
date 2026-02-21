@@ -6,6 +6,9 @@ import (
     "runtime"
     "strconv"
     "time"
+    "fmt"
+    "strings"
+    "sort"
 
     "github.com/shirou/gopsutil/v4/host"
 
@@ -244,4 +247,137 @@ func (h *Handler) NetConnections(w http.ResponseWriter, r *http.Request) {
         snaps = []*models.NetConnectionSnapshot{}
     }
     jsonOK(w, snaps)
+}
+
+func (h *Handler) AppSummary(w http.ResponseWriter, r *http.Request) {
+    window := queryDuration(r, "window", 30*time.Minute)
+    now    := time.Now().UnixMilli()
+    since  := now - window.Milliseconds()
+
+    snaps, err := h.store.QueryNetConnections(since, now, 0, "", "", "")
+    if err != nil {
+        jsonErr(w, http.StatusInternalServerError, err.Error())
+        return
+    }
+
+    // Aggregate across all snapshots in the window
+    type aggKey = string // process_name
+    type aggVal struct {
+        pids          map[int32]struct{}
+        remotes       map[string]struct{}
+        listenPorts   map[string]struct{}
+        suspPorts     map[string]struct{}
+        connCount     int
+    }
+
+    agg := map[aggKey]*aggVal{}
+
+    for _, snap := range snaps {
+        for _, c := range snap.Connections {
+            name := c.ProcessName
+            if name == "" || name == "unknown" {
+                name = fmt.Sprintf("pid-%d", c.PID)
+            }
+
+            if _, ok := agg[name]; !ok {
+                agg[name] = &aggVal{
+                    pids:        map[int32]struct{}{},
+                    remotes:     map[string]struct{}{},
+                    listenPorts: map[string]struct{}{},
+                    suspPorts:   map[string]struct{}{},
+                }
+            }
+
+            a := agg[name]
+            a.pids[c.PID] = struct{}{}
+            a.connCount++
+
+            if c.Status == "LISTEN" {
+                a.listenPorts[c.Laddr] = struct{}{}
+            } else if c.Raddr != "" && c.Raddr != "*:*" && c.Raddr != "0.0.0.0:0" {
+                a.remotes[c.Raddr] = struct{}{}
+            }
+
+            // Flag suspicious ports
+            if isSuspiciousPort(c.Raddr) {
+                a.suspPorts[c.Raddr] = struct{}{}
+            }
+        }
+    }
+
+    // Build response
+    results := make([]models.AppSummary, 0, len(agg))
+    for name, a := range agg {
+        pids := make([]int32, 0, len(a.pids))
+        for pid := range a.pids { pids = append(pids, pid) }
+
+        remotes := make([]string, 0, len(a.remotes))
+        for r := range a.remotes { remotes = append(remotes, r) }
+
+        listens := make([]string, 0, len(a.listenPorts))
+        for p := range a.listenPorts { listens = append(listens, p) }
+
+        suspicious := make([]string, 0, len(a.suspPorts))
+        for p := range a.suspPorts { suspicious = append(suspicious, p) }
+
+        results = append(results, models.AppSummary{
+            ProcessName:     name,
+            PIDs:            pids,
+            Category:        classifyProcess(name, listens, remotes),
+            UniqueRemotes:   len(a.remotes),
+            ConnCount:       a.connCount,
+            ListenPorts:     listens,
+            SuspiciousPorts: suspicious,
+        })
+    }
+
+    // Sort by unique remotes descending
+    sort.Slice(results, func(i, j int) bool {
+        return results[i].UniqueRemotes > results[j].UniqueRemotes
+    })
+
+    jsonOK(w, results)
+}
+
+// classifyProcess returns a human category for a given process name.
+func classifyProcess(name string, listenPorts, remotes []string) string {
+    n := strings.ToLower(name)
+
+    browsers   := []string{"chrome","firefox","msedge","brave","opera","safari","chromium"}
+    ides       := []string{"code","goland","idea","pycharm","webstorm","rider","clion","eclipse","nvim","vim","emacs","sublime"}
+    infra      := []string{"docker","kubelet","kubectl","containerd","k3s","vagrant","virtualbox","vmware"}
+    terminals  := []string{"wt","windowsterminal","terminal","iterm2","alacritty","kitty","konsole","xterm","gnome-terminal"}
+    sysWindows := []string{"svchost","lsass","csrss","wininit","services","winlogon","dwm","spoolsv","audiodg"}
+    sysLinux   := []string{"systemd","dbus-daemon","networkmanager","resolved","dhclient","cron","sshd","journald"}
+    mail       := []string{"thunderbird","outlook","mailspring"}
+    comms      := []string{"slack","discord","teams","zoom","signal","telegram"}
+    media      := []string{"spotify","vlc","mpv","mplayer","obs","streamlabs"}
+
+    for _, b := range browsers   { if strings.Contains(n, b) { return "browser"  } }
+    for _, i := range ides       { if strings.Contains(n, i) { return "dev-tool" } }
+    for _, i := range infra      { if strings.Contains(n, i) { return "infra"    } }
+    for _, t := range terminals  { if strings.Contains(n, t) { return "terminal" } }
+    for _, s := range sysWindows { if strings.Contains(n, s) { return "system"   } }
+    for _, s := range sysLinux   { if strings.Contains(n, s) { return "system"   } }
+    for _, m := range mail       { if strings.Contains(n, m) { return "mail"     } }
+    for _, c := range comms      { if strings.Contains(n, c) { return "comms"    } }
+    for _, m := range media      { if strings.Contains(n, m) { return "media"    } }
+
+    return "other"
+}
+
+// isSuspiciousPort flags outbound connections on unusual ports.
+func isSuspiciousPort(addr string) bool {
+    parts := strings.Split(addr, ":")
+    if len(parts) < 2 { return false }
+    portStr := parts[len(parts)-1]
+    port, err := strconv.Atoi(portStr)
+    if err != nil { return false }
+
+    // Flag outbound SMTP, IRC, non-standard high ports from system processes
+    suspicious := []int{25, 587, 6667, 6697, 4444, 1337, 31337}
+    for _, s := range suspicious {
+        if port == s { return true }
+    }
+    return false
 }

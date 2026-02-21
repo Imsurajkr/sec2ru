@@ -56,3 +56,13 @@ type NetConnectionSnapshot struct {
     Timestamp int64            `json:"ts"`
     Connections []NetConnection `json:"connections"`
 }
+
+type AppSummary struct {
+    ProcessName   string   `json:"process_name"`
+    PIDs          []int32  `json:"pids"`
+    Category      string   `json:"category"`
+    UniqueRemotes int      `json:"unique_remotes"`
+    ConnCount     int      `json:"conn_count"`
+    ListenPorts   []string `json:"listen_ports"`
+    SuspiciousPorts []string `json:"suspicious_ports,omitempty"`
+}

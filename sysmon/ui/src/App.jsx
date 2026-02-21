@@ -7,6 +7,9 @@ import Processes from './pages/Processes'
 import Spikes    from './pages/Spikes'
 import Info      from './pages/Info'
 import Servers   from './pages/Servers'
+import Connections from './pages/Connections'
+import AppTraffic  from './pages/AppTraffic'
+
 
 function Private({ children }) {
   const { isAuthed } = useAuth()
@@ -29,6 +32,8 @@ function AppRoutes() {
                 <Route path="spikes"    element={<Spikes />} />
                 <Route path="info"      element={<Info />} />
                 <Route path="servers"   element={<Servers />} />
+                <Route path="connections" element={<Connections />} />
+                <Route path="app-traffic" element={<AppTraffic />}  />
               </Routes>
             </Layout>
           </Private>

@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Server } from 'lucide-react'
 import { LayoutDashboard, List, Zap, Info, LogOut, ShieldCheck } from 'lucide-react'
+import { Network, BarChart2 } from 'lucide-react'
 
 const NAV = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -9,6 +10,8 @@ const NAV = [
   { to: '/spikes',    icon: Zap,             label: 'Spikes'    },
   { to: '/info',      icon: Info,            label: 'System Info'},
   { to: '/servers',   icon: Server,          label: 'Servers' },
+  { to: '/connections', icon: Network,       label: 'Connections' },
+  { to: '/app-traffic', icon: BarChart2,     label: 'App Traffic'  },
 ]
 
 export default function Layout({ children }) {
