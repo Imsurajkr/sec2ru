@@ -3,7 +3,7 @@ agent:
   collect_interval: "2s"
   retention: "24h"
   listen_addr: ":7070"
-  db_path: "sysmon.db"
+  db_path: "sec2ru.db"
 
 auth:
   username: "admin"

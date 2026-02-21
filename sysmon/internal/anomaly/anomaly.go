@@ -4,7 +4,7 @@ import (
     "sync"
     "time"
 
-    "github.com/imsurajkr/sysmon/internal/models"
+    "github.com/imsurajkr/sec2ru/internal/models"
 )
 
 const (

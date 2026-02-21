@@ -4,17 +4,17 @@ import client from '../api/client'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('sysmon_token'))
+  const [token, setToken] = useState(() => localStorage.getItem('sec2ru_token'))
 
   async function login(username, password) {
     const res = await client.post('/login', { username, password })
     const t = res.data.token
-    localStorage.setItem('sysmon_token', t)
+    localStorage.setItem('sec2ru_token', t)
     setToken(t)
   }
 
   function logout() {
-    localStorage.removeItem('sysmon_token')
+    localStorage.removeItem('sec2ru_token')
     setToken(null)
   }
 

@@ -6,7 +6,7 @@ import (
     "sort"
     "time"
 
-    "github.com/imsurajkr/sysmon/internal/models"
+    "github.com/imsurajkr/sec2ru/internal/models"
     "github.com/shirou/gopsutil/v4/cpu"
     "github.com/shirou/gopsutil/v4/disk"
     "github.com/shirou/gopsutil/v4/mem"

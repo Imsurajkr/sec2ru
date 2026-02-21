@@ -17,8 +17,8 @@ coverage.out
 vendor/
 
 # Binaries built by Makefile
-sysmon/agent
-sysmon/hashpw
+sec2ru/agent
+sec2ru/hashpw
 
 # Database files
 *.db
@@ -27,7 +27,7 @@ sysmon/hashpw
 *.db-wal
 
 # Configuration with secrets (use config.yaml.example for templates)
-sysmon/config.yaml
+sec2ru/config.yaml
 
 # Downloaded archives / tarballs
 *.tar.gz

@@ -6,7 +6,7 @@ import (
     "log"
     "time"
 
-    "github.com/imsurajkr/sysmon/internal/models"
+    "github.com/imsurajkr/sec2ru/internal/models"
     bolt "go.etcd.io/bbolt"
 )
 

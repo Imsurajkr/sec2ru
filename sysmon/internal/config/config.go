@@ -19,7 +19,7 @@ type AuthConfig struct {
     JWTSecret    string `yaml:"jwt_secret"`
 }
 
-// PeerConfig represents one remote sysmon agent node.
+// PeerConfig represents one remote sec2ru agent node.
 type PeerConfig struct {
     Name  string `yaml:"name"`
     URL   string `yaml:"url"`   // e.g. http://192.168.1.10:7070

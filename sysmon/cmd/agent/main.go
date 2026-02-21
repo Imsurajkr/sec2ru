@@ -10,13 +10,13 @@ import (
     "syscall"
     "time"
 
-    "github.com/imsurajkr/sysmon/internal/anomaly"
-    "github.com/imsurajkr/sysmon/internal/api"
-    "github.com/imsurajkr/sysmon/internal/auth"
-    "github.com/imsurajkr/sysmon/internal/collector"
-    "github.com/imsurajkr/sysmon/internal/config"
-    "github.com/imsurajkr/sysmon/internal/models"
-    "github.com/imsurajkr/sysmon/internal/store"
+    "github.com/imsurajkr/sec2ru/internal/anomaly"
+    "github.com/imsurajkr/sec2ru/internal/api"
+    "github.com/imsurajkr/sec2ru/internal/auth"
+    "github.com/imsurajkr/sec2ru/internal/collector"
+    "github.com/imsurajkr/sec2ru/internal/config"
+    "github.com/imsurajkr/sec2ru/internal/models"
+    "github.com/imsurajkr/sec2ru/internal/store"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
     }
 
     dbPath := cfg.Agent.DBPath
-    if dbPath == "" { dbPath = "sysmon.db" }
+    if dbPath == "" { dbPath = "sec2ru.db" }
 
     // ── Store ──────────────────────────────────────────────────────
     st, err := store.Open(dbPath, retention)
@@ -51,7 +51,7 @@ func main() {
     // ── Auth init ──────────────────────────────────────────────────
     secret := cfg.Auth.JWTSecret
     if secret == "" {
-        secret = "sysmon-insecure-default-change-me"
+        secret = "sec2ru-insecure-default-change-me"
         log.Println("[main] WARNING: jwt_secret not set — using default, tokens won't survive restarts")
     }
     auth.Init(secret)
@@ -106,7 +106,7 @@ func main() {
         }
     }()
 
-    log.Printf("[main] sysmon running | node=%s | interval=%s | db=%s",
+    log.Printf("[main] sec2ru running | node=%s | interval=%s | db=%s",
         cfg.Agent.NodeName, interval, dbPath)
 
     // ── Graceful shutdown ──────────────────────────────────────────

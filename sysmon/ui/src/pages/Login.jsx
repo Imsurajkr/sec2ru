@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Activity, AlertCircle } from 'lucide-react'
+import { ShieldCheck, AlertCircle } from 'lucide-react'
 
 export default function Login() {
   const { login }   = useAuth()
@@ -29,8 +29,8 @@ export default function Login() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          <Activity className="w-7 h-7 text-blue-400" />
-          <span className="text-xl font-semibold text-white">SysMon</span>
+          <ShieldCheck className="w-7 h-7 text-blue-400" />
+          <span className="text-xl font-semibold text-white">sec2ru</span>
         </div>
 
         <form

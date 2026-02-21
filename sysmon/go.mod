@@ -1,4 +1,4 @@
-module github.com/imsurajkr/sysmon
+module github.com/imsurajkr/sec2ru
 
 go 1.22
 

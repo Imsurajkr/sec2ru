@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Server } from 'lucide-react'
-import { LayoutDashboard, List, Zap, Info, LogOut, Activity } from 'lucide-react'
+import { LayoutDashboard, List, Zap, Info, LogOut, ShieldCheck } from 'lucide-react'
 
 const NAV = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -20,8 +20,8 @@ export default function Layout({ children }) {
       <aside className="w-56 flex-shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-5 py-4 border-b border-gray-800">
-          <Activity className="w-5 h-5 text-blue-400" />
-          <span className="text-white font-semibold text-sm tracking-wide">SysMon</span>
+          <ShieldCheck className="w-5 h-5 text-blue-400" />
+          <span className="text-white font-semibold text-sm tracking-wide">sec2ru</span>
         </div>
 
         {/* Nav links */}

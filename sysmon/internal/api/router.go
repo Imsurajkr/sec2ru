@@ -8,10 +8,10 @@ import (
     "github.com/go-chi/cors"
     "github.com/go-chi/jwtauth/v5"
 
-    "github.com/imsurajkr/sysmon/internal/auth"
-    "github.com/imsurajkr/sysmon/internal/config"
-    "github.com/imsurajkr/sysmon/internal/store"
-	"github.com/imsurajkr/sysmon/internal/ui"
+    "github.com/imsurajkr/sec2ru/internal/auth"
+    "github.com/imsurajkr/sec2ru/internal/config"
+    "github.com/imsurajkr/sec2ru/internal/store"
+	"github.com/imsurajkr/sec2ru/internal/ui"
 )
 
 // NewRouter builds the full Chi router.

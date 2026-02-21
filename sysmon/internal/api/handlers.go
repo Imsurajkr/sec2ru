@@ -9,11 +9,11 @@ import (
 
     "github.com/shirou/gopsutil/v4/host"
 
-    "github.com/imsurajkr/sysmon/internal/auth"
-    "github.com/imsurajkr/sysmon/internal/config"
-    "github.com/imsurajkr/sysmon/internal/models"
-    "github.com/imsurajkr/sysmon/internal/store"
-	"github.com/imsurajkr/sysmon/internal/hub"
+    "github.com/imsurajkr/sec2ru/internal/auth"
+    "github.com/imsurajkr/sec2ru/internal/config"
+    "github.com/imsurajkr/sec2ru/internal/models"
+    "github.com/imsurajkr/sec2ru/internal/store"
+	"github.com/imsurajkr/sec2ru/internal/hub"
 )
 
 // Handler holds shared dependencies for all HTTP handlers.
