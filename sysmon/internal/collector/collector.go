@@ -109,6 +109,7 @@ func firstOrUnknown(s []string) string {
 func Start(interval time.Duration,
     sysCh  chan<- *models.SystemSnapshot,
     procCh chan<- *models.ProcessSnapshot,
+    netCh  chan<- *models.NetConnectionSnapshot,
     stop   <-chan struct{}) {
 
     ticker := time.NewTicker(interval)
@@ -127,6 +128,11 @@ func Start(interval time.Duration,
                 procCh <- psnap
             } else {
                 log.Printf("[collector] process err: %v", err)
+            }
+            if nsnap, err := collectNetConnections(); err == nil {
+                netCh <- nsnap
+            } else {
+                log.Printf("[collector] network err: %v", err)
             }
         case <-stop:
             log.Println("[collector] stopped")

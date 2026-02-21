@@ -220,3 +220,28 @@ func (h *Handler) Self(w http.ResponseWriter, r *http.Request) {
     }
     jsonOK(w, resp)
 }
+
+// ── GET /api/network/conns ───────────────────────────────────────────
+func (h *Handler) NetConnections(w http.ResponseWriter, r *http.Request) {
+    pid, _ := strconv.Atoi(r.URL.Query().Get("pid"))
+    state := r.URL.Query().Get("state")
+    remoteIP := r.URL.Query().Get("remote_ip")
+    port := r.URL.Query().Get("port")
+
+    // Last 10 minutes for live view
+    now := time.Now().UnixMilli()
+    since := now - int64(10*time.Minute.Milliseconds())
+
+    snaps, err := h.store.QueryNetConnections(
+        since, now,
+        int32(pid), state, remoteIP, port,
+    )
+    if err != nil {
+        jsonErr(w, http.StatusInternalServerError, err.Error())
+        return
+    }
+    if snaps == nil {
+        snaps = []*models.NetConnectionSnapshot{}
+    }
+    jsonOK(w, snaps)
+}

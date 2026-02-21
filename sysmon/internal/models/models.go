@@ -39,3 +39,20 @@ type SpikeEvent struct {
     TopProcs   []Process `json:"top_processes"`
     Reason     string    `json:"reason"`
 }
+
+// ── Network connections ──────────────────────────────────────────────
+
+type NetConnection struct {
+    PID         int32   `json:"pid"`
+    ProcessName string  `json:"process_name"`
+    Family      string  `json:"family"`        // "ipv4", "ipv6", "unix"
+    Type        string  `json:"type"`          // "tcp", "udp"
+    Laddr       string  `json:"local_addr"`    // "127.0.0.1:80"
+    Raddr       string  `json:"remote_addr"`   // "8.8.8.8:53" or "*" for LISTEN
+    Status      string  `json:"status"`        // "ESTABLISHED", "LISTEN", "TIME_WAIT"
+}
+
+type NetConnectionSnapshot struct {
+    Timestamp int64            `json:"ts"`
+    Connections []NetConnection `json:"connections"`
+}

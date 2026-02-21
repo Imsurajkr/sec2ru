@@ -53,6 +53,7 @@ func NewRouter(cfg *config.Config, st *store.Store) http.Handler {
 		// Inside the protected r.Group:
 		r.Get("/api/nodes", h.Nodes)   // peer aggregation
 		r.Get("/api/self",  h.Self)    // this node as a card
+        r.Get("/api/network/conns", h.NetConnections)
     })
 
     return r

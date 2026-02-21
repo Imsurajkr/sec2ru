@@ -15,6 +15,7 @@ var (
     bucketProcesses = []byte("processes")
     bucketSpikes    = []byte("spikes")
     bucketMeta      = []byte("meta")
+    bucketNetConn   = []byte("netconn")
 )
 
 type Store struct {
@@ -28,7 +29,7 @@ func Open(path string, retention time.Duration) (*Store, error) {
         return nil, err
     }
     err = db.Update(func(tx *bolt.Tx) error {
-        for _, b := range [][]byte{bucketSystem, bucketProcesses, bucketSpikes, bucketMeta} {
+        for _, b := range [][]byte{bucketSystem, bucketProcesses, bucketSpikes, bucketMeta, bucketNetConn} {
             if _, err := tx.CreateBucketIfNotExists(b); err != nil {
                 return err
             }
@@ -71,6 +72,13 @@ func (s *Store) WriteSpike(spike *models.SpikeEvent) error {
     data, _ := json.Marshal(spike)
     return s.db.Update(func(tx *bolt.Tx) error {
         return tx.Bucket(bucketSpikes).Put(tsKey(spike.Timestamp), data)
+    })
+}
+
+func (s *Store) WriteNetConnections(snap *models.NetConnectionSnapshot) error {
+    data, _ := json.Marshal(snap)
+    return s.db.Update(func(tx *bolt.Tx) error {
+        return tx.Bucket(bucketNetConn).Put(tsKey(snap.Timestamp), data)
     })
 }
 
@@ -141,6 +149,51 @@ func (s *Store) QuerySpikes(since, until int64) ([]*models.SpikeEvent, error) {
     return out, err
 }
 
+func (s *Store) LatestNetConnections() (*models.NetConnectionSnapshot, error) {
+    var result *models.NetConnectionSnapshot
+    err := s.db.View(func(tx *bolt.Tx) error {
+        _, v := tx.Bucket(bucketNetConn).Cursor().Last()
+        if v == nil { return nil }
+        var snap models.NetConnectionSnapshot
+        if json.Unmarshal(v, &snap) == nil { result = &snap }
+        return nil
+    })
+    return result, err
+}
+
+func (s *Store) QueryNetConnections(since, until int64, pid int32, state, remoteIP, port string) ([]*models.NetConnectionSnapshot, error) {
+    var out []*models.NetConnectionSnapshot
+    err := s.db.View(func(tx *bolt.Tx) error {
+        c := tx.Bucket(bucketNetConn).Cursor()
+        for k, v := c.Seek(tsKey(since)); k != nil && bytesLE(k, tsKey(until)); k, v = c.Next() {
+            var snap models.NetConnectionSnapshot
+            if json.Unmarshal(v, &snap) == nil {
+                // Apply filters
+                if matchesFilters(&snap, pid, state, remoteIP, port) {
+                    out = append(out, &snap)
+                }
+            }
+        }
+        return nil
+    })
+    return out, err
+}
+
+func matchesFilters(snap *models.NetConnectionSnapshot, pid int32, state, remoteIP, port string) bool {
+    if pid != 0 {
+        for _, c := range snap.Connections {
+            if c.PID == pid { return true }
+        }
+        return false
+    }
+    if state != "" {
+        for _, c := range snap.Connections {
+            if c.Status == state { return true }
+        }
+        return false
+    }
+        return true
+}
 // ── TTL Cleanup ──────────────────────────────────────────────────────
 
 func (s *Store) Cleanup() {

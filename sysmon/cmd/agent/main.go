@@ -61,8 +61,9 @@ func main() {
     stop     := make(chan struct{})
     sysCh    := make(chan *models.SystemSnapshot, 20)
     procCh   := make(chan *models.ProcessSnapshot, 20)
+    netCh := make(chan *models.NetConnectionSnapshot, 10)
 
-    go collector.Start(interval, sysCh, procCh, stop)
+    go collector.Start(interval, sysCh, procCh, netCh, stop)
     go st.StartCleanup(stop)
 
     // Fan-in: persist + anomaly detection
@@ -82,6 +83,10 @@ func main() {
                 latestProc = psnap
                 if err := st.WriteProcesses(psnap); err != nil {
                     log.Printf("[main] write processes: %v", err)
+                }
+            case netSnap := <-netCh:
+                if err := st.WriteNetConnections(netSnap); err != nil {
+                    log.Printf("[main] write netconns: %v", err)
                 }
             case <-stop:
                 return
@@ -109,6 +114,7 @@ func main() {
     log.Printf("[main] sec2ru running | node=%s | interval=%s | db=%s",
         cfg.Agent.NodeName, interval, dbPath)
 
+    
     // ── Graceful shutdown ──────────────────────────────────────────
     quit := make(chan os.Signal, 1)
     signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
