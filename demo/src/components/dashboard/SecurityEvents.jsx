@@ -1,4 +1,4 @@
-import Badge from '../ui/Badge'
+import Badge from '../../ui/Badge'
 import { securityEvents } from '../../data/mockData'
 import { AlertTriangle } from 'lucide-react'
 

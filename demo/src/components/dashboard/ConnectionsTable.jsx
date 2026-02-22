@@ -1,4 +1,4 @@
-import Badge from '../ui/Badge'
+import Badge from '../../ui/Badge'
 import { connections } from '../../data/mockData'
 
 const stateColor = s => ({ ESTABLISHED:'text-green-400', LISTEN:'text-blue-400', TIME_WAIT:'text-yellow-400' })[s] ?? 'text-gray-400'

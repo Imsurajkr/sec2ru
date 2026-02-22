@@ -1,6 +1,5 @@
-import { useNavigate } from 'react-router'
 import { Network } from 'lucide-react'
-import Badge from '../ui/Badge'
+import Badge from '../../ui/Badge'
 import { processes } from '../../data/mockData'
 
 export default function ProcessTable() {

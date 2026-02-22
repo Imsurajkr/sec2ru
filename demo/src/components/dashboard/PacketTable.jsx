@@ -1,4 +1,4 @@
-import Badge from '../ui/Badge'
+import Badge from '../../ui/Badge'
 import { blockedPackets } from '../../data/mockData'
 
 export default function PacketTable({ limit }) {
