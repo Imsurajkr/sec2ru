@@ -20,8 +20,9 @@ export default function Hero({ onEnterDemo }) {
     let i = 0
     const interval = setInterval(() => {
       if (i < TERMINAL_LINES.length) {
-        setLines(prev => [...prev, TERMINAL_LINES[i]])
+        const line = TERMINAL_LINES[i]
         i++
+        setLines(prev => [...prev, line])
       } else {
         clearInterval(interval)
       }
